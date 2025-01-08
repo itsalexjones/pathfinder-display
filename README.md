@@ -1,6 +1,6 @@
 # Android Pathfinder Panel Client
 
-This project was created to display Telos Pathfinder Pro panels on [Iiyama Android Tablets](https://iiyama.com/gl_en/products/prolite-tw1025lasc-b1pnr/) and the AliExpress equivalents.
+This project was created to display Telos Pathfinder Pro panels on [Iiyama Android Tablets](https://iiyama.com/gl_en/products/prolite-tw1025lasc-b1pnr/) and the [AliExpress](https://www.aliexpress.com/item/1005003104677581.html) (Untested, but I think it's the same hardware) equivalents.
 
 It is tested against the linked Iiyama model and will currently not work on tablets without the LED modules.
 
