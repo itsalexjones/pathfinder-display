@@ -10,6 +10,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import radio.alexjones.studiodisplay.data.PathfinderClientOptions
 import radio.alexjones.studiodisplay.data.SettingsRepository
 import java.io.BufferedReader
 import java.io.DataOutputStream
@@ -23,9 +24,6 @@ class BackgroundLightingService() : LifecycleService() {
         private const val LOG_TAG = "BackgroundLightingService"
     }
 
-    private var pathfinderIp  = ""
-    private var onAirSlot: String? = null
-    private var micLiveSlot: String? = null
     private var client: PathfinderTcpClient? = null
 
     @Inject
@@ -42,15 +40,27 @@ class BackgroundLightingService() : LifecycleService() {
                 .combine(settingsRepository.getOnAirSlot) { serverLocation, onAir ->
                     Pair(serverLocation, onAir)
                 }
-                .combine(settingsRepository.getMicLiveSlot) { pair, micLive ->
-                    Triple(pair.first, pair.second, micLive)
+                .combine(settingsRepository.getMicLiveSlot) { (serverLocation, onAir), micLive ->
+                    Triple(serverLocation, onAir, micLive)
                 }
-                .collectLatest { (pathfinderIp, onAirSlot, micLiveSlot) ->
+                .combine(settingsRepository.getUserName) { (serverLocation, onAir, micLive), username ->
+                    Quadruple(serverLocation, onAir, micLive, username)
+                }
+                .combine(settingsRepository.getUserPassword) { (serverLocation, onAir, micLive, username), password ->
+                    PathfinderClientOptions(
+                        server = serverLocation,
+                        onAirSlot = onAir,
+                        micLiveSlot = micLive,
+                        username = username,
+                        password = password
+                    )
+                }
+                .collectLatest { options ->
                     Log.i(
                         LOG_TAG,
-                        "Pathfinder IP: $pathfinderIp, On Air Slot: $onAirSlot, Mic Live Slot: $micLiveSlot"
+                        "Pathfinder IP: ${options.server}, On Air Slot: ${options.onAirSlot}, Mic Live Slot: ${options.micLiveSlot}, Username: ${options.username}, Password: ${options.password}"
                     )
-                    client = PathfinderTcpClient(pathfinderIp, onAirSlot, micLiveSlot, lifecycleScope)
+                    client = PathfinderTcpClient(options, lifecycleScope)
                     client?.start()
                 }
         }

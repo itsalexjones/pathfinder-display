@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import radio.alexjones.studiodisplay.data.PathfinderClientOptions
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
@@ -19,9 +20,7 @@ import java.net.Socket
 import java.net.UnknownHostException
 
 class PathfinderTcpClient(
-    private val pathfinderServer: String?,
-    private val onAirSlot: String?,
-    private val micLiveSlot: String?,
+    private val clientOptions: PathfinderClientOptions,
     private val s: CoroutineScope
 ) {
     private var socket: Socket? = null
@@ -37,20 +36,11 @@ class PathfinderTcpClient(
     }
 
     fun start() {
-        if (pathfinderServer == null) {
-            throw Exception("Pathfinder server not set")
-        }
-        if (onAirSlot == null) {
-            throw Exception("On Air slot not set")
-        }
-        if (micLiveSlot == null) {
-            throw Exception("Mic Live slot not set")
-        }
 
         netScope.launch {
-            Log.d(LOG_TAG, "Starting Pathfinder Client for $pathfinderServer")
-            Log.d(LOG_TAG, "On Air Slot: $onAirSlot")
-            Log.d(LOG_TAG, "Mic Live Slot: $micLiveSlot")
+            Log.d(LOG_TAG, "Starting Pathfinder Client for ${clientOptions.server}")
+            Log.d(LOG_TAG, "On Air Slot: $clientOptions.onAirSlot")
+            Log.d(LOG_TAG, "Mic Live Slot: $clientOptions.micLiveSlot")
             while (netScope.isActive) {
                 try {
                     runClient()
@@ -103,7 +93,7 @@ class PathfinderTcpClient(
         Log.d(LOG_TAG, "Starting client")
         try {
             socket = Socket()
-            val inetAddress = InetAddress.getByName(pathfinderServer)
+            val inetAddress = InetAddress.getByName(clientOptions.server)
             socket?.connect(InetSocketAddress(inetAddress, PATHFINDER_PORT), 1000)
         } catch (e: UnknownHostException) {
             Log.e(LOG_TAG, "Unable to connect to pathfinder. Unknown host")
@@ -117,33 +107,33 @@ class PathfinderTcpClient(
         if (!socket!!.isConnected) {
             Log.e(
                 LOG_TAG,
-                "Socket not connected after create to $pathfinderServer:$PATHFINDER_PORT"
+                "Socket not connected after create to $clientOptions.server:$PATHFINDER_PORT"
             )
             throw Exception("Failed to connect to pathfinder")
         }
 
-        Log.i(LOG_TAG, "Connected to pathfinder at $pathfinderServer:$PATHFINDER_PORT")
-        val r = sendCommand("LOGIN Admin Admin", true)
+        Log.i(LOG_TAG, "Connected to pathfinder at $clientOptions.server:$PATHFINDER_PORT")
+        val r = sendCommand("LOGIN ${clientOptions.username} ${clientOptions.password}", true)
         if (r != null && "login successful" !in r) {
             Log.e(LOG_TAG, "Failed to log in to pathfinder. Response: $r")
             throw Exception("Failed to log into pathfinder")
         }
         Log.i(LOG_TAG, "Logged into Pathfinder")
 
-        val onAirResp = sendCommand("get MemorySlots#0.MemorySlot#$onAirSlot SlotValue", true)
-        if (onAirResp != null && "indi MemorySlots#0.MemorySlot#$onAirSlot" in onAirResp) {
+        val onAirResp = sendCommand("get MemorySlots#0.MemorySlot#$clientOptions.onAirSlot SlotValue", true)
+        if (onAirResp != null && "indi MemorySlots#0.MemorySlot#$clientOptions.onAirSlot" in onAirResp) {
             onAir = "SlotValue=ON" in onAirResp
             Log.i(LOG_TAG, "ON AIR set to $onAir")
         }
         val micLiveResp =
-            sendCommand("get MemorySlots#0.MemorySlot#$micLiveSlot SlotValue SlotValue", true)
-        if (micLiveResp != null && "indi MemorySlots#0.MemorySlot#$micLiveSlot" in micLiveResp) {
+            sendCommand("get MemorySlots#0.MemorySlot#$clientOptions.micLiveSlot SlotValue SlotValue", true)
+        if (micLiveResp != null && "indi MemorySlots#0.MemorySlot#${clientOptions.micLiveSlot}" in micLiveResp) {
             micLive = "SlotValue=ON" in micLiveResp
             Log.i(LOG_TAG, "MIC LIVE set to $micLive")
         }
         processLighting()
-        sendCommand("sub MemorySlots#0.MemorySlot#$onAirSlot SlotValue", false)
-        sendCommand("sub MemorySlots#0.MemorySlot#$micLiveSlot SlotValue", false)
+        sendCommand("sub MemorySlots#0.MemorySlot#$clientOptions.onAirSlot SlotValue", false)
+        sendCommand("sub MemorySlots#0.MemorySlot#$clientOptions.micLiveSlot SlotValue", false)
 
         while (true) {
             val r = reader?.readLine()
@@ -151,11 +141,11 @@ class PathfinderTcpClient(
             if (r == null) {
                 Log.w(LOG_TAG, "Received null response")
             }
-            if (r != null && "indi MemorySlots#0.MemorySlot#$onAirSlot" in r) {
+            if (r != null && "indi MemorySlots#0.MemorySlot#$clientOptions.onAirSlot" in r) {
                 onAir = "SlotValue=ON" in r
                 Log.i(LOG_TAG, "ON AIR set to $onAir")
             }
-            if (r != null && "indi MemorySlots#0.MemorySlot#$micLiveSlot" in r) {
+            if (r != null && "indi MemorySlots#0.MemorySlot#$clientOptions.micLiveSlot" in r) {
                 micLive = "SlotValue=ON" in r
                 Log.i(LOG_TAG, "MIC LIVE set to $micLive")
             }
