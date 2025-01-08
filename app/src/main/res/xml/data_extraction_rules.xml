@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ "THE BEER-WARE LICENSE"
-  ~ Alex Jones (alex [at] alexjones [dot] radio) wrote this file.
-  ~ As long as you retain this notice you can do whatever you want with this stuff.
-  ~ If we meet some day, and you think this stuff is worth it, you can buy me a beer in return.
-  -->
-
-<!--
    Sample data extraction rules file; uncomment and customize as necessary.
    See https://developer.android.com/about/versions/12/backup-restore#xml-changes
    for details.
