@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Global Studio Display</string>
+    <string name="title_activity_settings_page">SettingsPage</string>
+    <string name="title_activity_main">Global Studio Display</string>
+</resources>
