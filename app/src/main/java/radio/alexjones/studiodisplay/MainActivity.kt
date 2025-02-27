@@ -21,8 +21,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
 import radio.alexjones.studiodisplay.data.SettingsRepository
 import radio.alexjones.studiodisplay.ui.theme.GlobalStudioDisplayTheme
 import javax.inject.Inject
@@ -38,25 +36,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val view = LocalView.current
-            val panelUrl by settingsRepository.getServerLocation
-                .combine(settingsRepository.getUserName) { serverLocation, userName ->
-                    Pair(serverLocation, userName)
-                }
-                .combine(settingsRepository.getUserPassword) { pair, userPassword ->
-                    Triple(pair.first, pair.second, userPassword)
-                }
-                .combine(settingsRepository.getPanelName) { triple, panelName ->
-                    Quadruple(triple.first, triple.second, triple.third, panelName)
-                }
-                .combine(settingsRepository.getPanelPage) { quadruple, panelPage ->
-                    val url = "http://${quadruple.second}:${quadruple.third}@${quadruple.first}/userpanelframemin.php?panel=${quadruple.fourth}&page=$panelPage"
-                    Log.d("MainActivity", "Panel URL: $url")
-                    url
-                }
-                .onEach {
-                    Log.d("MainActivity", "Settings changed, updating URL")
-                }
+            val panelUrl by settingsRepository.getDisplayUrl
                 .collectAsState(initial = "")
+            Log.i("MainActivity", "Panel URL: $panelUrl")
 
             GlobalStudioDisplayTheme {
                     DefaultComponent(panelUrl)

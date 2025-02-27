@@ -75,14 +75,9 @@ fun Settings(viewModel: SettingsViewModel, onSave: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedTextField(
-                value = viewModel.panelName,
-                onValueChange = { viewModel.onPanelNameChange(it) },
-                label = { Text("Panel Name") }
-            )
-            OutlinedTextField(
-                value = viewModel.panelPage,
-                onValueChange = { viewModel.onPanelPageChange(it) },
-                label = { Text("Panel Page") }
+                value = viewModel.displayUrl,
+                onValueChange = { viewModel.onDisplayUrlChange(it) },
+                label = { Text("Display URL") }
             )
         }
         Column(

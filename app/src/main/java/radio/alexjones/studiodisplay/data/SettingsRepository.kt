@@ -19,10 +19,9 @@ class SettingsRepository @Inject constructor (@ApplicationContext private val co
         val PATHFINDER_SERVER_LOCATION = stringPreferencesKey("pathfinder_server_location")
         val PATHFINDER_USER_NAME = stringPreferencesKey("pathfinder_user_name")
         val PATHFINDER_USER_PASSWORD = stringPreferencesKey("pathfinder_user_password")
-        val PATHFINDER_PANEL_NAME = stringPreferencesKey("pathfinder_panel_name")
-        val PATHFINDER_PANEL_PAGE = stringPreferencesKey("pathfinder_panel_page")
         val PATHFINDER_ON_AIR_SLOT = stringPreferencesKey("pathfinder_on_air_slot")
         val PATHFINDER_MIC_LIVE_SLOT = stringPreferencesKey("pathfinder_mic_live_slot")
+        val DISPLAY_URL = stringPreferencesKey("display_url")
     }
 
     // Getters
@@ -44,18 +43,6 @@ class SettingsRepository @Inject constructor (@ApplicationContext private val co
         ret
     }
 
-    val getPanelName = context.dataStore.data.map { preferences ->
-        val ret = preferences[PATHFINDER_PANEL_NAME] ?: ""
-        Log.d("SettingsRepository", "getPanelName: $ret")
-        ret
-    }
-
-    val getPanelPage = context.dataStore.data.map { preferences ->
-        val ret = preferences[PATHFINDER_PANEL_PAGE] ?: "index"
-        Log.d("SettingsRepository", "getPanelPage: $ret")
-        ret
-    }
-
     val getOnAirSlot = context.dataStore.data.map { preferences ->
         val ret = preferences[PATHFINDER_ON_AIR_SLOT] ?: "On_Air"
         Log.d("SettingsRepository", "getOnAirSlot: $ret")
@@ -65,6 +52,12 @@ class SettingsRepository @Inject constructor (@ApplicationContext private val co
     val getMicLiveSlot = context.dataStore.data.map { preferences ->
         val ret = preferences[PATHFINDER_MIC_LIVE_SLOT] ?: "Mic_Live"
         Log.d("SettingsRepository", "getMicLiveSlot: $ret")
+        ret
+    }
+
+    val getDisplayUrl = context.dataStore.data.map { preferences ->
+        val ret = preferences[DISPLAY_URL] ?: "https://www.google.com"
+        Log.d("SettingsRepository", "getDisplayUrl: $ret")
         ret
     }
 
@@ -94,21 +87,6 @@ class SettingsRepository @Inject constructor (@ApplicationContext private val co
         }
     }
 
-    suspend fun setPanelName(panelName: String) {
-        Log.d("SettingsRepository", "setPanelName: $panelName")
-        context.dataStore.updateData { preferences ->
-            preferences.toMutablePreferences()
-                .apply { this[PATHFINDER_PANEL_NAME] = panelName } }
-    }
-
-    suspend fun setPanelPage(panelPage: String) {
-        Log.d("SettingsRepository", "setPanelPage: $panelPage")
-        context.dataStore.updateData { preferences ->
-            preferences.toMutablePreferences()
-                .apply { this[PATHFINDER_PANEL_PAGE] = panelPage }
-        }
-    }
-
     suspend fun setOnAirSlot(onAirSlot: String) {
         Log.d("SettingsRepository", "setOnAirSlot: $onAirSlot")
         context.dataStore.updateData { preferences ->
@@ -122,6 +100,14 @@ class SettingsRepository @Inject constructor (@ApplicationContext private val co
         context.dataStore.updateData { preferences ->
             preferences.toMutablePreferences()
                 .apply { this[PATHFINDER_MIC_LIVE_SLOT] = micLiveSlot }
+        }
+    }
+
+    suspend fun setDisplayUrl(displayUrl: String) {
+        Log.d("SettingsRepository", "setDisplayUrl: $displayUrl")
+        context.dataStore.updateData { preferences ->
+            preferences.toMutablePreferences()
+                .apply { this[DISPLAY_URL] = displayUrl }
         }
     }
 }

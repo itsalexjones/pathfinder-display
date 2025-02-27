@@ -21,13 +21,11 @@ class SettingsViewModel @Inject constructor(
         private set
     var userPassword by mutableStateOf("")
         private set
-    var panelName by mutableStateOf("")
-        private set
-    var panelPage by mutableStateOf("")
-        private set
     var onAirSlot by mutableStateOf("")
         private set
     var micLiveSlot by mutableStateOf("")
+        private set
+    var displayUrl by mutableStateOf("")
         private set
 
     init {
@@ -42,16 +40,13 @@ class SettingsViewModel @Inject constructor(
                 settingsRepository.getUserPassword.collect { userPassword = it }
             }
             launch {
-                settingsRepository.getPanelName.collect { panelName = it }
-            }
-            launch {
-                settingsRepository.getPanelPage.collect { panelPage = it }
-            }
-            launch {
                 settingsRepository.getOnAirSlot.collect { onAirSlot = it }
             }
             launch {
                 settingsRepository.getMicLiveSlot.collect { micLiveSlot = it }
+            }
+            launch {
+                settingsRepository.getDisplayUrl.collect { displayUrl = it }
             }
         }
     }
@@ -68,20 +63,16 @@ class SettingsViewModel @Inject constructor(
         userPassword = newUserPassword
     }
 
-    fun onPanelNameChange(newPanelName: String) {
-        panelName = newPanelName
-    }
-
-    fun onPanelPageChange(newPanelPage: String) {
-        panelPage = newPanelPage
-    }
-
     fun onOnAirSlotChange(newOnAirSlot: String) {
         onAirSlot = newOnAirSlot
     }
 
     fun onMicLiveSlotChange(newMicLiveSlot: String) {
         micLiveSlot = newMicLiveSlot
+    }
+
+    fun onDisplayUrlChange(newDisplayUrl: String) {
+        displayUrl = newDisplayUrl
     }
 
     fun saveSettings() {
@@ -96,16 +87,13 @@ class SettingsViewModel @Inject constructor(
                 settingsRepository.setUserPassword(userPassword)
             }
             launch {
-                settingsRepository.setPanelName(panelName)
-            }
-            launch {
-                settingsRepository.setPanelPage(panelPage)
-            }
-            launch {
                 settingsRepository.setOnAirSlot(onAirSlot)
             }
             launch {
                 settingsRepository.setMicLiveSlot(micLiveSlot)
+            }
+            launch {
+                settingsRepository.setDisplayUrl(displayUrl)
             }
         }
     }
